@@ -328,31 +328,35 @@ function drawVariantStripeTop(context, match, logos){
 
 function drawVariantDiagonal(context, match, logos){
   clearAndBackground(context);
-  // Diagonal overlay
-  const grad = context.createLinearGradient(0,0, context.canvas.width, context.canvas.height);
-  grad.addColorStop(0,'rgba(102,126,234,0.85)');
-  grad.addColorStop(1,'rgba(118,75,162,0.85)');
+  // White diagonal panel instead of purple gradient
   context.save();
   context.beginPath();
-  context.moveTo(0,0); context.lineTo(context.canvas.width,0); context.lineTo(context.canvas.width, context.canvas.height*0.55); context.lineTo(0, context.canvas.height*0.75); context.closePath();
-  context.fillStyle=grad; context.fill();
+  context.moveTo(0,0);
+  context.lineTo(context.canvas.width,0);
+  context.lineTo(context.canvas.width, context.canvas.height*0.55);
+  context.lineTo(0, context.canvas.height*0.75);
+  context.closePath();
+  context.fillStyle='rgba(255,255,255,0.9)';
+  context.fill();
   context.restore();
   const centerX = context.canvas.width/2; const centerY = context.canvas.height/2 - 40;
-  context.fillStyle='#fff'; context.font='bold 44px Arial'; context.textAlign='center';
+  // Date (dark)
+  context.fillStyle='#2c3e50'; context.font='bold 44px Arial'; context.textAlign='center';
   wrapCentered(context, match.date.toUpperCase(), centerX, centerY-190, 760, 46);
-  // Circular backgrounds for logos
+  // Circular soft white backplates for logos
   const homeLogo = logos?.home?.img || null; const awayLogo = logos?.away?.img || null;
   const radius = 130; const homeCx = centerX - 260; const awayCx = centerX + 260; const cy = centerY - 20;
   [ [homeCx, homeLogo, 'HOME'], [awayCx, awayLogo, 'AWAY'] ].forEach(([cx,img,label])=>{
-    context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI*2); context.fillStyle='rgba(255,255,255,0.15)'; context.fill();
+    context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI*2); context.fillStyle='rgba(255,255,255,0.55)'; context.fill();
     if (img) context.drawImage(img, cx-110, cy-110, 220, 220); else placeholderBadge(context, cx, cy, label);
   });
-  context.fillStyle='#fff'; context.font='bold 90px Arial'; context.fillText('VS', centerX, centerY + 40);
-  context.fillStyle='#fff'; context.font='bold 70px Arial'; context.fillText(match.time, centerX, centerY + 140);
-  // Bottom ribbon
-  context.fillStyle='rgba(0,0,0,0.55)'; context.fillRect(0, context.canvas.height-140, context.canvas.width, 140);
-  context.fillStyle='#e74c3c'; context.font='bold 42px Arial'; context.fillText(match.isHome ? 'THUIS' : 'UIT', centerX, context.canvas.height - 90);
-  context.fillStyle='#fff'; context.font='bold 64px Arial'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 40);
+  // VS & time styling
+  context.fillStyle='#e74c3c'; context.font='bold 100px Arial'; context.fillText('VS', centerX, centerY + 35);
+  context.fillStyle='#2c3e50'; context.font='bold 70px Arial'; context.fillText(match.time, centerX, centerY + 140);
+  // Bottom ribbon stays brand red
+  context.fillStyle='rgba(231,76,60,0.95)'; context.fillRect(0, context.canvas.height-140, context.canvas.width, 140);
+  context.fillStyle='#fff'; context.font='bold 42px Arial'; context.fillText(match.isHome ? 'THUIS' : 'UIT', centerX, context.canvas.height - 90);
+  context.font='bold 64px Arial'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 40);
 }
 
 function drawVariantMinimal(context, match, logos){
