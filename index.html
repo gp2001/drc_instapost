@@ -35,33 +35,41 @@
                 <div class="preset-gallery" id="presetGallery" aria-labelledby="presetLabel" aria-label="Vooraf ingestelde achtergronden"></div>
                 <div class="preset-hint">Klik of gebruik Enter/Spatie om te selecteren.</div>
             </div>
-            <button class="btn" id="generateBtn" type="button">Genereer 6 Voorbeelden</button>
             <div class="status" id="status" aria-live="polite"></div>
         </div>
-        <div class="preview-area">
+        <div class="preview-area not-ready">
             <h2>Voorbeelden</h2>
-            <div class="preview-grid" role="radiogroup" aria-label="Voorbeeld selecteren">
-                <div class="canvas-item selected" data-variant="0" tabindex="0" role="radio" aria-checked="true">
+            <div class="preview-placeholder" id="previewPlaceholder">
+                <p>Selecteer eerst een wedstrijd en achtergrond om voorbeelden te genereren.</p>
+            </div>
+            <div class="preview-grid" aria-label="Voorbeeld selecteren">
+                <div class="canvas-item selected" data-variant="0" tabindex="0">
+                    <input class="variant-radio" type="radio" name="variantSelect" value="0" checked aria-label="Variant 1">
                     <div class="canvas-container"><canvas class="match-canvas" id="previewCanvas0" width="1080" height="1080" aria-label="Voorbeeld 1"></canvas></div>
                     <div class="canvas-label">Variant 1</div>
                 </div>
-                <div class="canvas-item" data-variant="1" tabindex="0" role="radio" aria-checked="false">
+                <div class="canvas-item" data-variant="1" tabindex="0">
+                    <input class="variant-radio" type="radio" name="variantSelect" value="1" aria-label="Variant 2">
                     <div class="canvas-container"><canvas class="match-canvas" id="previewCanvas1" width="1080" height="1080" aria-label="Voorbeeld 2"></canvas></div>
                     <div class="canvas-label">Variant 2</div>
                 </div>
-                <div class="canvas-item" data-variant="2" tabindex="0" role="radio" aria-checked="false">
+                <div class="canvas-item" data-variant="2" tabindex="0">
+                    <input class="variant-radio" type="radio" name="variantSelect" value="2" aria-label="Variant 3">
                     <div class="canvas-container"><canvas class="match-canvas" id="previewCanvas2" width="1080" height="1080" aria-label="Voorbeeld 3"></canvas></div>
                     <div class="canvas-label">Variant 3</div>
                 </div>
-                <div class="canvas-item" data-variant="3" tabindex="0" role="radio" aria-checked="false">
+                <div class="canvas-item" data-variant="3" tabindex="0">
+                    <input class="variant-radio" type="radio" name="variantSelect" value="3" aria-label="Variant 4">
                     <div class="canvas-container"><canvas class="match-canvas" id="previewCanvas3" width="1080" height="1080" aria-label="Voorbeeld 4"></canvas></div>
                     <div class="canvas-label">Variant 4</div>
                 </div>
-                <div class="canvas-item" data-variant="4" tabindex="0" role="radio" aria-checked="false">
+                <div class="canvas-item" data-variant="4" tabindex="0">
+                    <input class="variant-radio" type="radio" name="variantSelect" value="4" aria-label="Variant 5">
                     <div class="canvas-container"><canvas class="match-canvas" id="previewCanvas4" width="1080" height="1080" aria-label="Voorbeeld 5"></canvas></div>
                     <div class="canvas-label">Variant 5</div>
                 </div>
-                <div class="canvas-item" data-variant="5" tabindex="0" role="radio" aria-checked="false">
+                <div class="canvas-item" data-variant="5" tabindex="0">
+                    <input class="variant-radio" type="radio" name="variantSelect" value="5" aria-label="Variant 6">
                     <div class="canvas-container"><canvas class="match-canvas" id="previewCanvas5" width="1080" height="1080" aria-label="Voorbeeld 6"></canvas></div>
                     <div class="canvas-label">Variant 6</div>
                 </div>

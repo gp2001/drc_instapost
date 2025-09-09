@@ -2,7 +2,7 @@
 
 // -------------------- Data -------------------- //
 const matches = [
-  { isoDate: '2025-09-11', date: "donderdag 11 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "AVC Heracles", time: "20:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT37E", isHome: true },
+  { isoDate: '2025-09-11', date: "donderdag 11 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "AVC Heracles 2", time: "20:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT37E", isHome: true },
   { isoDate: '2025-09-13', date: "zaterdag 13 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
   { isoDate: '2025-09-20', date: "zaterdag 20 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "s.v. Rijssen 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", isHome: true },
   { isoDate: '2025-09-27', date: "zaterdag 27 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
@@ -53,6 +53,7 @@ const statusEl = document.getElementById('status');
 const downloadStatusEl = document.getElementById('downloadStatus');
 let selectedVariant = 0; // default first
 let loadedLogos = null; // {home:{img,tainted}, away:{img,tainted}}
+let isGenerating = false; // prevent overlapping renders
 
 // -------------------- Init -------------------- //
 (function init(){
@@ -61,11 +62,22 @@ let loadedLogos = null; // {home:{img,tainted}, away:{img,tainted}}
   initPresetGallery();
   initVariantSelection();
   contexts.forEach(ctx => drawDefaultCanvas(ctx));
-  document.getElementById('generateBtn').addEventListener('click', generateVariants);
   document.getElementById('downloadBtn').addEventListener('click', downloadPost);
 })();
 
 // -------------------- UI Population -------------------- //
+function tryAutoGenerate(){
+  if (!selectedMatch || !backgroundImage) return; // wait until both chosen
+  // If preview area still hidden show it
+  const previewArea = document.querySelector('.preview-area');
+  if (previewArea.classList.contains('not-ready')){
+    const placeholder = document.getElementById('previewPlaceholder');
+    if (placeholder) placeholder.style.display='none';
+    previewArea.classList.remove('not-ready');
+  }
+  generateVariants();
+}
+
 function populateMatchSelect(){
   const select = document.getElementById('matchSelect');
   const today = new Date(); today.setHours(0,0,0,0);
@@ -80,10 +92,9 @@ function populateMatchSelect(){
     select.appendChild(new Option(label, match._i));
   });
   select.addEventListener('change', e => {
-    if (e.target.value !== ''){
-      selectedMatch = matches[parseInt(e.target.value,10)];
-      if (backgroundImage) generateVariants();
-    }
+    selectedMatch = e.target.value === '' ? null : matches[parseInt(e.target.value,10)];
+    statusEl.textContent = selectedMatch ? 'Wedstrijd gekozen.' : '';
+    tryAutoGenerate();
   });
 }
 
@@ -100,7 +111,7 @@ function initPresetGallery(){
       gallery.querySelectorAll('.preset-item.selected').forEach(el=>el.classList.remove('selected'));
       item.classList.add('selected');
       const loaded = new Image();
-      loaded.onload = () => { backgroundImage = loaded; document.querySelector('.upload-area p').textContent = 'Achtergrond gekozen uit bibliotheek'; if (selectedMatch) generateVariants(); };
+      loaded.onload = () => { backgroundImage = loaded; document.querySelector('.upload-area p').textContent = 'Achtergrond gekozen uit bibliotheek'; statusEl.textContent='Achtergrond gekozen.'; tryAutoGenerate(); };
       loaded.src = path;
     };
     item.addEventListener('click', selectThis);
@@ -138,7 +149,7 @@ function handleFileUpload(file){
   if (!file.type.startsWith('image/')) return alert('Alleen afbeeldingen zijn toegestaan!');
   if (file.size > 5 * 1024 * 1024) return alert('Bestand is te groot! Max 5MB toegestaan.');
   const reader = new FileReader();
-  reader.onload = e => { const img = new Image(); img.onload = () => { backgroundImage = img; document.querySelector('.upload-area p').textContent = `Afbeelding geladen: ${file.name}`; document.querySelectorAll('.preset-item.selected').forEach(el=>el.classList.remove('selected')); if (selectedMatch) generateVariants(); }; img.src = e.target.result; };
+  reader.onload = e => { const img = new Image(); img.onload = () => { backgroundImage = img; document.querySelector('.upload-area p').textContent = `Afbeelding geladen: ${file.name}`; document.querySelectorAll('.preset-item.selected').forEach(el=>el.classList.remove('selected')); statusEl.textContent='Achtergrond gekozen.'; tryAutoGenerate(); }; img.src = e.target.result; };
   reader.readAsDataURL(file);
 }
 
@@ -414,10 +425,11 @@ function drawVariantBadgeCenter(context, match, logos){
 
 // Updated generate to produce all variants
 function generateVariants(){
-  if (!selectedMatch || !backgroundImage) return alert('Selecteer eerst een wedstrijd en upload of kies een achtergrond afbeelding!');
+  if (isGenerating) return; // debounce overlapping
+  if (!(selectedMatch && backgroundImage)) return;
+  isGenerating = true;
   statusEl.textContent='Bezig met genereren...';
   canvasTainted = false;
-  // Load logos once then draw each variant
   Promise.all([
     loadLogo(selectedMatch.homeLogo),
     loadLogo(selectedMatch.awayLogo)
@@ -425,16 +437,16 @@ function generateVariants(){
     loadedLogos = { home, away };
     if (home?.tainted || away?.tainted) canvasTainted = true;
     contexts.forEach((ctx,i)=> drawVariant(i, ctx, selectedMatch, loadedLogos));
-    statusEl.textContent = canvasTainted ? 'Klaar (let op: mogelijk CORS voor logo’s).' : 'Klaar.';
+    statusEl.textContent = canvasTainted ? 'Voorbeelden klaar (let op: mogelijk CORS voor logo’s).' : 'Voorbeelden klaar.';
   }).catch(()=>{
     loadedLogos = { home:null, away:null };
     contexts.forEach((ctx,i)=> drawVariant(i, ctx, selectedMatch, loadedLogos));
     statusEl.textContent='Logo laden mislukt.';
-  });
+  }).finally(()=>{ isGenerating = false; });
 }
 
 // Replace old generatePost reference if still used externally
-const generatePost = generateVariants;
+// const generatePost = generateVariants;
 
 async function downloadPost(){
   if (!selectedMatch || !backgroundImage) return alert('Genereer eerst de voorbeelden!');
