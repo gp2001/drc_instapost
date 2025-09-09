@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SV DRC 2012 - Instagram Post Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(45deg, #2c3e50, #34495e); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+        .main-content { display: grid; grid-template-columns: 400px 1fr; gap: 30px; padding: 30px; align-items: flex-start; }
+        .controls { background: #f8f9fa; padding: 25px; border-radius: 15px; border: 2px solid #e9ecef; position: sticky; top: 15px; }
+        .controls h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.5rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #495057; }
+        .form-group select, .form-group input { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        .upload-area { border: 3px dashed #dee2e6; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px; }
+        .upload-area:hover { border-color: #667eea; background: #f8f9ff; }
+        .upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+        .upload-icon { font-size: 3rem; color: #6c757d; margin-bottom: 15px; }
+        .btn { background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s; width: 100%; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.3); }
+        .preview-area { position: relative; background: #f8f9fa; border-radius: 15px; padding: 25px; text-align: center; }
+        .canvas-wrapper { display:flex; flex-direction:column; align-items:center; gap:15px; }
+        .canvas-container { position: relative; display: inline-block; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; width: 100%; max-width: 560px; aspect-ratio: 1/1; }
+        #previewCanvas { display:block; width:100%; height:100%; object-fit:contain; }
+        .download-btn { margin-top: 10px; background: linear-gradient(45deg, #28a745, #20c997); width:100%; }
+        .download-btn:hover { box-shadow: 0 10px 20px rgba(40,167,69,0.3); }
+        .status { font-size: 0.85rem; color:#555; min-height:1.2em; }
+        /* Added preset background gallery styles */
+        .preset-gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; margin-bottom:5px; }
+        .preset-item { position:relative; border:2px solid #dee2e6; border-radius:8px; overflow:hidden; cursor:pointer; aspect-ratio:1/1; background:#fff; }
+        .preset-item img { width:100%; height:100%; object-fit:cover; display:block; }
+        .preset-item:hover { border-color:#667eea; }
+        .preset-item.selected { border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,0.35); }
+        .preset-hint { font-size:11px; color:#6c757d; margin-bottom:8px; }
+        @media (max-width: 1100px) { .main-content { grid-template-columns: 350px 1fr; gap:20px; padding:25px; } }
+        @media (max-width: 900px) { .main-content { grid-template-columns: 1fr; } .controls { order:2; position:static; } .preview-area { order:1; } }
+        @media (max-width: 600px) { .header h1 { font-size:2rem; } .canvas-container { max-width:100%; } .main-content { padding:20px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚽ SV DRC 2012</h1>
+        <p>Instagram Post Generator voor Wedstrijden</p>
+    </div>
+    <div class="main-content">
+        <div class="controls">
+            <h2>Wedstrijd Selecteren</h2>
+            <div class="form-group">
+                <label for="matchSelect">Kies een wedstrijd:</label>
+                <select id="matchSelect">
+                    <option value="">Selecteer een wedstrijd...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="backgroundUpload">Achtergrond Afbeelding:</label>
+                <div class="upload-area" id="uploadArea" aria-label="Upload achtergrond afbeelding">
+                    <div class="upload-icon">📁</div>
+                    <p>Sleep een afbeelding hierheen of klik om te uploaden</p>
+                    <small>JPG, PNG, max 5MB</small>
+                </div>
+                <input type="file" id="backgroundUpload" accept="image/*" style="display: none;">
+            </div>
+            <!-- New: Preset background selection -->
+            <div class="form-group">
+                <label>Of kies een bestaande achtergrond:</label>
+                <div class="preset-gallery" id="presetGallery" aria-label="Vooraf ingestelde achtergronden"></div>
+                <div class="preset-hint">Klik of gebruik Enter/Spatie om te selecteren.</div>
+            </div>
+            <button class="btn" id="generateBtn" type="button">Genereer Instagram Post</button>
+            <div class="status" id="status" aria-live="polite"></div>
+        </div>
+        <div class="preview-area">
+            <h2>Voorbeeld</h2>
+            <div class="canvas-wrapper">
+                <div class="canvas-container">
+                    <canvas id="previewCanvas" width="1080" height="1080" aria-label="Voorbeeld Instagram afbeelding"></canvas>
+                </div>
+                <button class="btn download-btn" id="downloadBtn" type="button">Download Post</button>
+                <div class="status" id="downloadStatus" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Match data with isoDate for filtering upcoming matches
+    const matches = [
+        { isoDate: '2025-09-13', date: "zaterdag 13 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2025-09-20', date: "zaterdag 20 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "s.v. Rijssen 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", isHome: true },
+        { isoDate: '2025-09-27', date: "zaterdag 27 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2025-10-04', date: "zaterdag 4 oktober 2025", homeTeam: "SV DRC 2012 1", awayTeam: "Sportclub Rijssen 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKY02L", isHome: true },
+        { isoDate: '2025-10-11', date: "zaterdag 11 oktober 2025", homeTeam: "Victoria '28 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR33Y", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2025-10-25', date: "zaterdag 25 oktober 2025", homeTeam: "SV DRC 2012 1", awayTeam: "SC Enschede 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR66C", isHome: true },
+        { isoDate: '2025-11-01', date: "zaterdag 1 november 2025", homeTeam: "EMOS 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX21P", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2025-11-08', date: "zaterdag 8 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "SVV '91 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKW42R", isHome: true },
+        { isoDate: '2025-11-22', date: "zaterdag 22 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "BZSV de Blauwwitters 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT134", isHome: true },
+        { isoDate: '2025-11-29', date: "zaterdag 29 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "De Tubanters 1897 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT75O", isHome: true },
+        { isoDate: '2025-12-06', date: "zaterdag 6 december 2025", homeTeam: "EFC PW 1885 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX12N", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2026-01-31', date: "zaterdag 31 januari 2026", homeTeam: "s.v. Rijssen 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2026-02-07', date: "zaterdag 7 februari 2026", homeTeam: "SV DRC 2012 1", awayTeam: "FC Aramea 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", isHome: true },
+        { isoDate: '2026-02-28', date: "zaterdag 28 februari 2026", homeTeam: "Sportclub Rijssen 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKY02L", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2026-03-07', date: "zaterdag 7 maart 2026", homeTeam: "SV DRC 2012 1", awayTeam: "Victoria '28 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR33Y", isHome: true },
+        { isoDate: '2026-03-14', date: "zaterdag 14 maart 2026", homeTeam: "SC Enschede 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR66C", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2026-03-21', date: "zaterdag 21 maart 2026", homeTeam: "SV DRC 2012 1", awayTeam: "EMOS 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX21P", isHome: true },
+        { isoDate: '2026-03-28', date: "zaterdag 28 maart 2026", homeTeam: "SVV '91 1", awayTeam: "SV DRC 2012 1", time: "14:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKW42R", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2026-04-18', date: "zaterdag 18 april 2026", homeTeam: "BZSV de Blauwwitters 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT134", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
+        { isoDate: '2026-05-09', date: "zaterdag 9 mei 2026", homeTeam: "SV DRC 2012 1", awayTeam: "EFC PW 1885 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX12N", isHome: true },
+        { isoDate: '2026-05-16', date: "zaterdag 16 mei 2026", homeTeam: "De Tubanters 1897 1", awayTeam: "SV DRC 2012 1", time: "15:15", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT75O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false }
+    ];
+
+    const presetBackgrounds = [
+        'img/485437157_17885022696250032_5436364154748334515_n.jpg',
+        'img/485790489_17885022657250032_3992219924780858834_n.jpg',
+        'img/485964564_17885022687250032_9111789748228200947_n.jpg',
+        'img/485990307_17885022705250032_7959596681191365443_n.jpg',
+        'img/486044440_17885022633250032_1660088353521374380_n.jpg',
+        'img/486052401_17885022675250032_3591721298460659784_n.jpg',
+        'img/486519902_17885022648250032_571595400200978865_n.jpg',
+        'img/486559930_17885022666250032_8929534141537722409_n.jpg'
+    ];
+
+    let selectedMatch = null;
+    let backgroundImage = null;
+    let canvasTainted = false;
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+    const downloadStatusEl = document.getElementById('downloadStatus');
+
+    document.getElementById('generateBtn').addEventListener('click', generatePost);
+    document.getElementById('downloadBtn').addEventListener('click', downloadPost);
+
+    function init() { populateMatchSelect(); setupUpload(); initPresetGallery(); drawDefaultCanvas(); }
+
+    function populateMatchSelect() {
+        const select = document.getElementById('matchSelect');
+        const today = new Date(); today.setHours(0,0,0,0);
+        const upcoming = matches.map((m,i)=>({ ...m, _i:i })).filter(m => new Date(m.isoDate) >= today);
+        if (!upcoming.length) {
+            const opt = document.createElement('option');
+            opt.value=''; opt.textContent='Geen komende wedstrijden'; opt.disabled=true; select.appendChild(opt); return;
+        }
+        upcoming.forEach(match => {
+            const option = document.createElement('option');
+            option.value = match._i; // original index
+            const opponent = match.isHome ? match.awayTeam : match.homeTeam;
+            option.textContent = `${match.date} - ${match.isHome ? 'THUIS' : 'UIT'} vs ${opponent} (${match.time})`;
+            select.appendChild(option);
+        });
+        select.addEventListener('change', function() { if (this.value !== '') { selectedMatch = matches[parseInt(this.value)]; if (backgroundImage) generatePost(); }});
+    }
+
+    function setupUpload() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('backgroundUpload');
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); const files = e.dataTransfer.files; if (files.length) handleFileUpload(files[0]); });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFileUpload(e.target.files[0]); });
+    }
+
+    function initPresetGallery() {
+        const gallery = document.getElementById('presetGallery');
+        if (!gallery) return;
+        presetBackgrounds.forEach(path => {
+            const item = document.createElement('div');
+            item.className = 'preset-item';
+            item.tabIndex = 0;
+            const img = document.createElement('img');
+            img.src = path;
+            img.alt = 'Achtergrond';
+            item.appendChild(img);
+            const selectThis = () => {
+                document.querySelectorAll('.preset-item.selected').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+                const loaded = new Image();
+                loaded.onload = () => {
+                    backgroundImage = loaded;
+                    document.querySelector('.upload-area p').textContent = 'Achtergrond gekozen uit bibliotheek';
+                    if (selectedMatch) generatePost();
+                };
+                loaded.src = path;
+            };
+            item.addEventListener('click', selectThis);
+            item.addEventListener('keypress', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectThis(); } });
+            gallery.appendChild(item);
+        });
+    }
+
+    function handleFileUpload(file) {
+        if (!file.type.startsWith('image/')) { alert('Alleen afbeeldingen zijn toegestaan!'); return; }
+        if (file.size > 5 * 1024 * 1024) { alert('Bestand is te groot! Max 5MB toegestaan.'); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) { const img = new Image(); img.onload = function() { backgroundImage = img; document.querySelector('.upload-area p').textContent = `Afbeelding geladen: ${file.name}`; document.querySelectorAll('.preset-item.selected').forEach(el => el.classList.remove('selected')); if (selectedMatch) generatePost(); }; img.src = e.target.result; };
+        reader.readAsDataURL(file);
+    }
+
+    function drawDefaultCanvas() {
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '48px Arial';
+        ctx.textAlign='center';
+        ctx.fillText('Selecteer een wedstrijd en upload', canvas.width/2, canvas.height/2 - 30);
+        ctx.fillText('een achtergrond afbeelding', canvas.width/2, canvas.height/2 + 30);
+    }
+
+    function getProxyUrl(url) {
+        const cleaned = url.replace(/^https?:\/\//,'');
+        return `https://images.weserv.nl/?url=${encodeURIComponent(cleaned)}&w=400&il`;
+    }
+
+    function attemptCors(src){
+        return new Promise((resolve,reject)=>{ const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>resolve(img); img.onerror=reject; img.src=src; });
+    }
+    function attemptNoCors(src){
+        return new Promise((resolve)=>{ const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>resolve(null); img.src = src + (src.includes('?')? '&':'?') + 'nocors=1'; });
+    }
+    function loadLogo(src) {
+        return new Promise(resolve => {
+            attemptCors(src).then(img => resolve({ img, tainted:false }))
+                .catch(() => attemptCors(getProxyUrl(src)).then(img => resolve({ img, tainted:false }))
+                    .catch(() => attemptNoCors(src).then(img => resolve({ img, tainted:true }))));
+        });
+    }
+
+    function generatePost() {
+        if (!selectedMatch || !backgroundImage) { alert('Selecteer eerst een wedstrijd en upload of kies een achtergrond afbeelding!'); return; }
+        statusEl.textContent = 'Bezig met genereren...';
+        canvasTainted = false;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const bgAspect = backgroundImage.width / backgroundImage.height; const canvasAspect = canvas.width / canvas.height;
+        let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+        if (bgAspect > canvasAspect) { drawHeight = canvas.height; drawWidth = drawHeight * bgAspect; offsetX = (canvas.width - drawWidth)/2; }
+        else { drawWidth = canvas.width; drawHeight = drawWidth / bgAspect; offsetY = (canvas.height - drawHeight)/2; }
+        ctx.drawImage(backgroundImage, offsetX, offsetY, drawWidth, drawHeight);
+        ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        Promise.all([ loadLogo(selectedMatch.homeLogo), loadLogo(selectedMatch.awayLogo) ])
+            .then(([home, away]) => {
+                if ((home && home.tainted) || (away && away.tainted)) { canvasTainted = true; }
+                drawMatchInfo(home ? home.img : null, away ? away.img : null);
+                statusEl.textContent = canvasTainted ? 'Let op: 1 of meer logo’s zonder CORS geladen (proxy gebruikt bij download).' : 'Klaar.';
+            })
+            .catch(() => {
+                drawMatchInfo(null,null);
+                statusEl.textContent = 'Logo laden mislukt.';
+            });
+    }
+
+    function getWrappedLines(context, text, maxWidth, font){
+        context.save();
+        if (font) context.font = font;
+        const words = text.split(' ');
+        let line = '';
+        const lines = [];
+        for (let i=0;i<words.length;i++) {
+            const testLine = line + words[i] + ' ';
+            if (context.measureText(testLine).width > maxWidth && i>0) {
+                lines.push(line.trim());
+                line = words[i] + ' ';
+            } else {
+                line = testLine;
+            }
+        }
+        if (line) lines.push(line.trim());
+        context.restore();
+        return lines;
+    }
+
+    function drawTeamName(context, text, centerX, topY, maxWidth, baseFontSize, highlight){
+        let fontSize = baseFontSize;
+        let lineHeight = Math.round(fontSize * 1.05);
+        context.textAlign='center';
+        context.textBaseline='alphabetic';
+        context.font = `bold ${fontSize}px Arial`;
+        let lines = getWrappedLines(context, text, maxWidth, context.font);
+        const availableHeight = ( (canvas.height/2) + 140 - 10 ) - topY;
+        while ( (lines.length * lineHeight) > availableHeight && fontSize > 22 ) {
+            fontSize -= 2;
+            lineHeight = Math.round(fontSize * 1.1);
+            context.font = `bold ${fontSize}px Arial`;
+            lines = getWrappedLines(context, text, maxWidth, context.font);
+        }
+        context.fillStyle = highlight ? '#e74c3c' : '#2c3e50';
+        lines.forEach((l,idx)=>{ context.fillText(l, centerX, topY + idx * lineHeight + fontSize); });
+    }
+
+    function addRoundRectPolyfill(){
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                this.beginPath();
+                this.moveTo(x+r, y);
+                this.lineTo(x+w-r, y);
+                this.quadraticCurveTo(x+w, y, x+w, y+r);
+                this.lineTo(x+w, y+h-r);
+                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                this.lineTo(x+r, y+h);
+                this.quadraticCurveTo(x, y+h, x, y+h-r);
+                this.lineTo(x, y+r);
+                this.quadraticCurveTo(x, y, x+r, y);
+                this.closePath();
+            };
+        }
+    }
+
+    function wrapText(text, x, y, maxWidth, lineHeight){
+        const words = text.split(' '); let line = '', lines = []; ctx.textAlign='center';
+        for (let n=0;n<words.length;n++){ const testLine = line + words[n] + ' '; const metrics = ctx.measureText(testLine); if (metrics.width > maxWidth && n>0){ lines.push(line); line = words[n] + ' '; } else { line = testLine; } }
+        lines.push(line);
+        const startY = y - ((lines.length-1)/2)*lineHeight;
+        lines.forEach((l,i)=> ctx.fillText(l.trim(), x, startY + i*lineHeight));
+    }
+
+    function drawMatchInfo(homeLogo, awayLogo) {
+        const centerX = canvas.width/2, centerY = canvas.height/2;
+        if (!CanvasRenderingContext2D.prototype.roundRect) { addRoundRectPolyfill(); }
+        ctx.fillStyle='rgba(255,255,255,0.95)';
+        ctx.roundRect(centerX-400, centerY-200, 800, 400, 30); ctx.fill();
+        ctx.fillStyle='#2c3e50'; ctx.font='bold 42px Arial'; ctx.textAlign='center';
+        wrapText(selectedMatch.date.toUpperCase(), centerX, centerY-135, 700, 44);
+        const logoSize = 120;
+        const logoY = centerY - logoSize/2;
+        const homeLogoX = centerX - 300;
+        const awayLogoX = centerX + 180;
+        if (homeLogo) { ctx.drawImage(homeLogo, homeLogoX, logoY, logoSize, logoSize); } else { placeholderBadge(homeLogoX + logoSize/2, logoY + logoSize/2, 'HOME'); }
+        if (awayLogo) { ctx.drawImage(awayLogo, awayLogoX, logoY, logoSize, logoSize); } else { placeholderBadge(awayLogoX + logoSize/2, logoY + logoSize/2, 'AWAY'); }
+        ctx.fillStyle='#2c3e50'; ctx.font='bold 70px Arial'; ctx.fillText('VS', centerX, centerY + 10);
+        ctx.fillStyle='#e74c3c'; ctx.font='bold 64px Arial'; ctx.fillText(selectedMatch.time, centerX, centerY + 100);
+        const labelTop = logoY + logoSize + 8;
+        drawTeamName(ctx, selectedMatch.homeTeam, homeLogoX + logoSize/2, labelTop, 180, 30, selectedMatch.isHome);
+        drawTeamName(ctx, selectedMatch.awayTeam, awayLogoX + logoSize/2, labelTop, 180, 30, !selectedMatch.isHome);
+        ctx.fillStyle='#fff'; ctx.fillRect(centerX-160, centerY + 140, 320, 60);
+        ctx.fillStyle='#e74c3c'; ctx.font='bold 30px Arial'; ctx.fillText(selectedMatch.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY + 180);
+        ctx.fillStyle='rgba(231,76,60,0.95)'; ctx.fillRect(0, canvas.height - 110, canvas.width, 110);
+        ctx.fillStyle='#fff'; ctx.font='bold 60px Arial'; ctx.fillText('SV DRC 2012', centerX, canvas.height - 40);
+    }
+
+    function placeholderBadge(x, y, text){
+        const radius = 60;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI*2);
+        ctx.fillStyle = '#ececec';
+        ctx.fill();
+        ctx.strokeStyle = '#bbb';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.fillStyle = '#666';
+        ctx.font = 'bold 22px Arial';
+        ctx.textAlign='center';
+        ctx.fillText(text, x, y+8);
+        ctx.restore();
+    }
+
+    async function downloadPost() {
+        if (!selectedMatch || !backgroundImage) { alert('Genereer eerst een post!'); return; }
+        downloadStatusEl.textContent = 'Exporteren...';
+        if (!canvasTainted) {
+            triggerDownload(canvas.toDataURL());
+            downloadStatusEl.textContent = 'Download klaar.';
+            return;
+        }
+        try {
+            const off = document.createElement('canvas'); off.width = canvas.width; off.height = canvas.height; const octx = off.getContext('2d');
+            const bgAspect = backgroundImage.width / backgroundImage.height; const canvasAspect = off.width / off.height; let drawWidth, drawHeight, offsetX=0, offsetY=0;
+            if (bgAspect > canvasAspect) { drawHeight = off.height; drawWidth = drawHeight * bgAspect; offsetX = (off.width - drawWidth)/2; } else { drawWidth = off.width; drawHeight = drawWidth / bgAspect; offsetY = (off.height - drawHeight)/2; }
+            octx.drawImage(backgroundImage, offsetX, offsetY, drawWidth, drawHeight);
+            octx.fillStyle='rgba(0,0,0,0.4)'; octx.fillRect(0,0,off.width,off.height);
+            const [home, away] = await Promise.all([
+                attemptCors(getProxyUrl(selectedMatch.homeLogo)).catch(()=>null),
+                attemptCors(getProxyUrl(selectedMatch.awayLogo)).catch(()=>null)
+            ]);
+            addRoundRectPolyfill();
+            const centerX = off.width/2, centerY = off.height/2;
+            octx.fillStyle='rgba(255,255,255,0.95)'; octx.roundRect(centerX-400, centerY-200, 800, 400, 30); octx.fill();
+            octx.fillStyle='#2c3e50'; octx.font='bold 42px Arial'; octx.textAlign='center'; wrapTextOff(octx, selectedMatch.date.toUpperCase(), centerX, centerY-135, 700, 44);
+            const logoSize = 120;
+            const logoY = centerY - logoSize/2;
+            const homeLogoX = centerX - 300;
+            const awayLogoX = centerX + 180;
+            if (home) { octx.drawImage(home, homeLogoX, logoY, logoSize, logoSize); } else { placeholderBadgeOff(octx, homeLogoX + logoSize/2, logoY + logoSize/2, 'HOME'); }
+            if (away) { octx.drawImage(away, awayLogoX, logoY, logoSize, logoSize); } else { placeholderBadgeOff(octx, awayLogoX + logoSize/2, logoY + logoSize/2, 'AWAY'); }
+            octx.fillStyle='#2c3e50'; octx.font='bold 70px Arial'; octx.fillText('VS', centerX, centerY+10);
+            octx.fillStyle='#e74c3c'; octx.font='bold 64px Arial'; octx.fillText(selectedMatch.time, centerX, centerY+100);
+            const labelTop = logoY + logoSize + 8;
+            drawTeamNameOff(octx, selectedMatch.homeTeam, homeLogoX + logoSize/2, labelTop, 180, 30, selectedMatch.isHome);
+            drawTeamNameOff(octx, selectedMatch.awayTeam, awayLogoX + logoSize/2, labelTop, 180, 30, !selectedMatch.isHome);
+            octx.fillStyle='#fff'; octx.fillRect(centerX-160, centerY+140, 320, 60); octx.fillStyle='#e74c3c'; octx.font='bold 30px Arial'; octx.fillText(selectedMatch.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY+180);
+            octx.fillStyle='rgba(231,76,60,0.95)'; octx.fillRect(0, off.height-110, off.width, 110); octx.fillStyle='#fff'; octx.font='bold 60px Arial'; octx.fillText('SV DRC 2012', centerX, off.height-40);
+            triggerDownload(off.toDataURL());
+            downloadStatusEl.textContent = 'Download klaar.';
+        } catch (e) {
+            console.error(e);
+            downloadStatusEl.textContent = 'Export mislukt. Probeer opnieuw.';
+        }
+    }
+
+    function wrapTextOff(ctx2, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' '); let line = '', lines = []; ctx2.textAlign='center';
+        for (let n=0;n<words.length;n++){ const testLine = line + words[n] + ' '; const metrics = ctx2.measureText(testLine); if (metrics.width > maxWidth && n>0){ lines.push(line); line = words[n] + ' '; } else { line = testLine; } }
+        lines.push(line);
+        const startY = y - ((lines.length-1)/2)*lineHeight;
+        lines.forEach((l,i)=> ctx2.fillText(l.trim(), x, startY + i*lineHeight));
+    }
+
+    function drawTeamNameOff(octx, text, centerX, topY, maxWidth, baseFontSize, highlight){
+        let fontSize = baseFontSize; let lineHeight = Math.round(fontSize * 1.05);
+        octx.textAlign='center'; octx.textBaseline='alphabetic'; octx.font = `bold ${fontSize}px Arial`;
+        let lines = getWrappedLines(octx, text, maxWidth, octx.font);
+        const availableHeight = ( (octx.canvas.height/2) + 140 - 10 ) - topY;
+        while ( (lines.length * lineHeight) > availableHeight && fontSize > 22 ) {
+            fontSize -= 2; lineHeight = Math.round(fontSize * 1.1); octx.font = `bold ${fontSize}px Arial`; lines = getWrappedLines(octx, text, maxWidth, octx.font);
+        }
+        octx.fillStyle = highlight ? '#e74c3c' : '#2c3e50';
+        lines.forEach((l,idx)=>{ octx.fillText(l, centerX, topY + idx * lineHeight + fontSize); });
+    }
+
+    function placeholderBadgeOff(octx, x, y, text){
+        octx.save(); octx.beginPath(); octx.arc(x, y, 60, 0, Math.PI*2); octx.fillStyle = '#ececec'; octx.fill(); octx.strokeStyle = '#bbb'; octx.lineWidth = 4; octx.stroke(); octx.fillStyle = '#666'; octx.font = 'bold 22px Arial'; octx.textAlign='center'; octx.fillText(text, x, y+8); octx.restore();
+    }
+
+    function triggerDownload(dataUrl) {
+        const a = document.createElement('a');
+        a.download = `SV-DRC-2012-${selectedMatch.date.replace(/\s+/g,'-')}.png`;
+        a.href = dataUrl;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    init();
+</script>
+</body>
+</html>
