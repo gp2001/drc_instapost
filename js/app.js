@@ -257,15 +257,12 @@ function drawMatchInfo(context, match, homeLogo, awayLogo){
   if (homeLogo) context.drawImage(homeLogo, homeLogoX, logoY, logoSize, logoSize); else placeholderBadge(context, homeLogoX + logoSize/2, logoY + logoSize/2, 'HOME');
   if (awayLogo) context.drawImage(awayLogo, awayLogoX, logoY, logoSize, logoSize); else placeholderBadge(context, awayLogoX + logoSize/2, logoY + logoSize/2, 'AWAY');
   context.fillStyle='#2c3e50'; context.font='bold 70px Arial'; context.fillText('VS', centerX, centerY + 10);
-  // Time color changed from red to black
   context.fillStyle='#000000'; context.font='bold 64px Arial'; context.fillText(match.time, centerX, centerY + 100);
   const labelTop = logoY + logoSize + 8;
   drawTeamName(context, match.homeTeam, homeLogoX + logoSize/2, labelTop, 180, 30, match.isHome);
   drawTeamName(context, match.awayTeam, awayLogoX + logoSize/2, labelTop, 180, 30, !match.isHome);
-  context.fillStyle='#fff'; context.fillRect(centerX-160, centerY + 140, 320, 60);
-  // THUIS/UIT text color changed to black
+  // Removed extra white bar behind THUIS/UIT label
   context.fillStyle='#000000'; context.font='bold 30px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY + 180);
-  // Bottom bar changed from red rgba(231,76,60,0.95) to near-black
   context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0, context.canvas.height - 110, context.canvas.width, 110);
   context.fillStyle='#fff'; context.font='bold 60px Arial'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 40);
 }
@@ -321,7 +318,6 @@ function drawVariantClassic(context, match, logos){
 function drawVariantStripeTop(context, match, logos){
   clearAndBackground(context);
   const {centerX, centerY} = {centerX: context.canvas.width/2, centerY: context.canvas.height/2};
-  // Top stripe color changed to black
   context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0,0,context.canvas.width,160);
   context.fillStyle='#fff'; context.font='bold 54px Arial'; context.textAlign='center';
   context.fillText('SV DRC 2012', centerX, 105);
@@ -330,9 +326,8 @@ function drawVariantStripeTop(context, match, logos){
   wrapCentered(context, match.date.toUpperCase(), centerX, centerY-150, 720, 44);
   const logosMeta = commonLogos(match, context, logos);
   context.fillStyle='#2c3e50'; context.font='bold 72px Arial'; context.fillText('VS', centerX, logosMeta.centerY + 10);
-  // Time color changed to black
   context.fillStyle='#000000'; context.font='bold 62px Arial'; context.fillText(match.time, centerX, logosMeta.centerY + 120);
-  context.fillStyle='#fff'; context.fillRect(centerX-200, logosMeta.centerY + 150, 400, 58);
+  // Removed extra white bar behind THUIS/UIT label
   context.fillStyle='#000000'; context.font='bold 30px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, logosMeta.centerY + 192);
 }
 
