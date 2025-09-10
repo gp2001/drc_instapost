@@ -475,18 +475,42 @@ async function downloadPost(){
     downloadStatusEl.textContent='Download klaar.'; return;
   }
   try {
-    // Rebuild selected variant with proxy logos to avoid taint
+    const buildProxyCandidates = (url) => {
+      const stripped = url.replace(/^https?:\/\//,'');
+      return [
+        url,
+        `https://images.weserv.nl/?url=${encodeURIComponent(stripped)}&w=400&fit=inside&default=1`,
+        `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=400&fit=inside&default=1`,
+        `https://images.weserv.nl/?url=${encodeURIComponent(stripped)}&n=-1`,
+        `https://images.weserv.nl/?url=${encodeURIComponent(stripped)}`
+      ];
+    };
+    const tryCandidates = async (cands) => {
+      for (const c of cands){
+        try { const img = await attemptCors(c); return img; } catch { /* continue */ }
+      }
+      return null;
+    };
+    // Helper to obtain a CORS-safe logo for export
+    const makeSafeLogo = async (url, loaded) => {
+      if (!url) return null;
+      if (url.startsWith('img/')) return (loaded && loaded.img) ? { img: loaded.img, tainted:false } : null;
+      const img = await tryCandidates(buildProxyCandidates(url));
+      if (img) return { img, tainted:false };
+      // If we totally failed, fallback to placeholder by returning null so variant draws badge
+      return null;
+    };
+
+    const homeSafe = await makeSafeLogo(selectedMatch.homeLogo, loadedLogos?.home);
+    const awaySafe = await makeSafeLogo(selectedMatch.awayLogo, loadedLogos?.away);
+
     const off = document.createElement('canvas'); off.width=targetCtx.canvas.width; off.height=targetCtx.canvas.height; const octx = off.getContext('2d');
-    const [homeSafe, awaySafe] = await Promise.all([
-      attemptCors(getProxyUrl(selectedMatch.homeLogo)).catch(()=>null),
-      attemptCors(getProxyUrl(selectedMatch.awayLogo)).catch(()=>null)
-    ]);
-    // draw background & variant
     drawBackgroundFit(octx, backgroundImage); octx.fillStyle='rgba(0,0,0,0.35)'; octx.fillRect(0,0,off.width,off.height);
-    const safeLogos = { home: homeSafe? {img:homeSafe, tainted:false}: null, away: awaySafe? {img:awaySafe, tainted:false}: null };
+    const safeLogos = { home: homeSafe, away: awaySafe };
     drawVariant(selectedVariant, octx, selectedMatch, safeLogos);
     triggerDownload(off.toDataURL());
-    downloadStatusEl.textContent='Download klaar.';
+    const missing = (!homeSafe && selectedMatch.homeLogo) || (!awaySafe && selectedMatch.awayLogo);
+    downloadStatusEl.textContent = missing ? 'Download klaar (sommige logo’s konden niet veilig geladen).' : 'Download klaar.';
   } catch(err){ console.error(err); downloadStatusEl.textContent='Export mislukt.'; }
 }
 
