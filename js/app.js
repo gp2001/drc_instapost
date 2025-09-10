@@ -1,29 +1,30 @@
 /* Instagram Post Generator - Refactored & Optimized */
 
 // -------------------- Data -------------------- //
+const DRC_LOGO = 'img/drc_logo.png';
 const matches = [
-  { isoDate: '2025-09-11', date: "donderdag 11 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "AVC Heracles 2", time: "20:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT37E", isHome: true },
-  { isoDate: '2025-09-13', date: "zaterdag 13 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2025-09-20', date: "zaterdag 20 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "s.v. Rijssen 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", isHome: true },
-  { isoDate: '2025-09-27', date: "zaterdag 27 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2025-10-04', date: "zaterdag 4 oktober 2025", homeTeam: "SV DRC 2012 1", awayTeam: "Sportclub Rijssen 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKY02L", isHome: true },
-  { isoDate: '2025-10-11', date: "zaterdag 11 oktober 2025", homeTeam: "Victoria '28 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR33Y", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2025-10-25', date: "zaterdag 25 oktober 2025", homeTeam: "SV DRC 2012 1", awayTeam: "SC Enschede 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR66C", isHome: true },
-  { isoDate: '2025-11-01', date: "zaterdag 1 november 2025", homeTeam: "EMOS 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX21P", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2025-11-08', date: "zaterdag 8 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "SVV '91 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKW42R", isHome: true },
-  { isoDate: '2025-11-22', date: "zaterdag 22 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "BZSV de Blauwwitters 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT134", isHome: true },
-  { isoDate: '2025-11-29', date: "zaterdag 29 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "De Tubanters 1897 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT75O", isHome: true },
-  { isoDate: '2025-12-06', date: "zaterdag 6 december 2025", homeTeam: "EFC PW 1885 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX12N", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2026-01-31', date: "zaterdag 31 januari 2026", homeTeam: "s.v. Rijssen 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2026-02-07', date: "zaterdag 7 februari 2026", homeTeam: "SV DRC 2012 1", awayTeam: "FC Aramea 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", isHome: true },
-  { isoDate: '2026-02-28', date: "zaterdag 28 februari 2026", homeTeam: "Sportclub Rijssen 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKY02L", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2026-03-07', date: "zaterdag 7 maart 2026", homeTeam: "SV DRC 2012 1", awayTeam: "Victoria '28 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR33Y", isHome: true },
-  { isoDate: '2026-03-14', date: "zaterdag 14 maart 2026", homeTeam: "SC Enschede 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR66C", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2026-03-21', date: "zaterdag 21 maart 2026", homeTeam: "SV DRC 2012 1", awayTeam: "EMOS 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX21P", isHome: true },
-  { isoDate: '2026-03-28', date: "zaterdag 28 maart 2026", homeTeam: "SVV '91 1", awayTeam: "SV DRC 2012 1", time: "14:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKW42R", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2026-04-18', date: "zaterdag 18 april 2026", homeTeam: "BZSV de Blauwwitters 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT134", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false },
-  { isoDate: '2026-05-09', date: "zaterdag 9 mei 2026", homeTeam: "SV DRC 2012 1", awayTeam: "EFC PW 1885 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX12N", isHome: true },
-  { isoDate: '2026-05-16', date: "zaterdag 16 mei 2026", homeTeam: "De Tubanters 1897 1", awayTeam: "SV DRC 2012 1", time: "15:15", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT75O", awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=PJZV43O", isHome: false }
+  { isoDate: '2025-09-11', date: "donderdag 11 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "AVC Heracles 2", time: "20:00", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT37E", isHome: true },
+  { isoDate: '2025-09-13', date: "zaterdag 13 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2025-09-20', date: "zaterdag 20 september 2025", homeTeam: "SV DRC 2012 1", awayTeam: "s.v. Rijssen 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", isHome: true },
+  { isoDate: '2025-09-27', date: "zaterdag 27 september 2025", homeTeam: "FC Aramea 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2025-10-04', date: "zaterdag 4 oktober 2025", homeTeam: "SV DRC 2012 1", awayTeam: "Sportclub Rijssen 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKY02L", isHome: true },
+  { isoDate: '2025-10-11', date: "zaterdag 11 oktober 2025", homeTeam: "Victoria '28 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR33Y", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2025-10-25', date: "zaterdag 25 oktober 2025", homeTeam: "SV DRC 2012 1", awayTeam: "SC Enschede 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR66C", isHome: true },
+  { isoDate: '2025-11-01', date: "zaterdag 1 november 2025", homeTeam: "EMOS 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX21P", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2025-11-08', date: "zaterdag 8 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "SVV '91 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKW42R", isHome: true },
+  { isoDate: '2025-11-22', date: "zaterdag 22 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "BZSV de Blauwwitters 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT134", isHome: true },
+  { isoDate: '2025-11-29', date: "zaterdag 29 november 2025", homeTeam: "SV DRC 2012 1", awayTeam: "De Tubanters 1897 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT75O", isHome: true },
+  { isoDate: '2025-12-06', date: "zaterdag 6 december 2025", homeTeam: "EFC PW 1885 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX12N", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2026-01-31', date: "zaterdag 31 januari 2026", homeTeam: "s.v. Rijssen 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=SSTS02K", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2026-02-07', date: "zaterdag 7 februari 2026", homeTeam: "SV DRC 2012 1", awayTeam: "FC Aramea 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=NXRS63J", isHome: true },
+  { isoDate: '2026-02-28', date: "zaterdag 28 februari 2026", homeTeam: "Sportclub Rijssen 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKY02L", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2026-03-07', date: "zaterdag 7 maart 2026", homeTeam: "SV DRC 2012 1", awayTeam: "Victoria '28 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR33Y", isHome: true },
+  { isoDate: '2026-03-14', date: "zaterdag 14 maart 2026", homeTeam: "SC Enschede 1", awayTeam: "SV DRC 2012 1", time: "15:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKR66C", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2026-03-21', date: "zaterdag 21 maart 2026", homeTeam: "SV DRC 2012 1", awayTeam: "EMOS 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX21P", isHome: true },
+  { isoDate: '2026-03-28', date: "zaterdag 28 maart 2026", homeTeam: "SVV '91 1", awayTeam: "SV DRC 2012 1", time: "14:00", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKW42R", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2026-04-18', date: "zaterdag 18 april 2026", homeTeam: "BZSV de Blauwwitters 1", awayTeam: "SV DRC 2012 1", time: "14:30", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT134", awayLogo: DRC_LOGO, isHome: false },
+  { isoDate: '2026-05-09', date: "zaterdag 9 mei 2026", homeTeam: "SV DRC 2012 1", awayTeam: "EFC PW 1885 1", time: "14:30", homeLogo: DRC_LOGO, awayLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKX12N", isHome: true },
+  { isoDate: '2026-05-16', date: "zaterdag 16 mei 2026", homeTeam: "De Tubanters 1897 1", awayTeam: "SV DRC 2012 1", time: "15:15", homeLogo: "https://logoapi.voetbal.nl/logo.php?clubcode=BBKT75O", awayLogo: DRC_LOGO, isHome: false }
 ];
 
 const presetBackgrounds = [
@@ -181,6 +182,11 @@ const attemptNoCors = src => new Promise(res => { const img=new Image(); img.onl
 function loadLogo(src){
   if (!src) return Promise.resolve({ img:null, tainted:false });
   if (logoCache.has(src)) return logoCache.get(src);
+  // Fast path for local images (no CORS attempts needed)
+  if (src.startsWith('img/')) {
+    const p = new Promise(resolve => { const img = new Image(); img.onload=()=>resolve({ img, tainted:false }); img.src = src; });
+    logoCache.set(src, p); return p;
+  }
   const p = (async () => {
     try {
       const img = await attemptCors(src);
@@ -219,7 +225,8 @@ function drawTeamName(context, text, centerX, topY, maxWidth, baseFontSize, high
   while ((lines.length * lineHeight) > availableHeight && fontSize > 22){
     fontSize -= 2; lineHeight = Math.round(fontSize * 1.1); context.font = `bold ${fontSize}px Arial`; lines = getWrappedLines(context, text, maxWidth);
   }
-  context.fillStyle = highlight ? '#e74c3c' : '#2c3e50';
+  // Changed highlight color from red (#e74c3c) to black
+  context.fillStyle = highlight ? '#000000' : '#2c3e50';
   lines.forEach((l,idx)=> context.fillText(l, centerX, topY + idx * lineHeight + fontSize));
 }
 
@@ -250,13 +257,16 @@ function drawMatchInfo(context, match, homeLogo, awayLogo){
   if (homeLogo) context.drawImage(homeLogo, homeLogoX, logoY, logoSize, logoSize); else placeholderBadge(context, homeLogoX + logoSize/2, logoY + logoSize/2, 'HOME');
   if (awayLogo) context.drawImage(awayLogo, awayLogoX, logoY, logoSize, logoSize); else placeholderBadge(context, awayLogoX + logoSize/2, logoY + logoSize/2, 'AWAY');
   context.fillStyle='#2c3e50'; context.font='bold 70px Arial'; context.fillText('VS', centerX, centerY + 10);
-  context.fillStyle='#e74c3c'; context.font='bold 64px Arial'; context.fillText(match.time, centerX, centerY + 100);
+  // Time color changed from red to black
+  context.fillStyle='#000000'; context.font='bold 64px Arial'; context.fillText(match.time, centerX, centerY + 100);
   const labelTop = logoY + logoSize + 8;
   drawTeamName(context, match.homeTeam, homeLogoX + logoSize/2, labelTop, 180, 30, match.isHome);
   drawTeamName(context, match.awayTeam, awayLogoX + logoSize/2, labelTop, 180, 30, !match.isHome);
   context.fillStyle='#fff'; context.fillRect(centerX-160, centerY + 140, 320, 60);
-  context.fillStyle='#e74c3c'; context.font='bold 30px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY + 180);
-  context.fillStyle='rgba(231,76,60,0.95)'; context.fillRect(0, context.canvas.height - 110, context.canvas.width, 110);
+  // THUIS/UIT text color changed to black
+  context.fillStyle='#000000'; context.font='bold 30px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY + 180);
+  // Bottom bar changed from red rgba(231,76,60,0.95) to near-black
+  context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0, context.canvas.height - 110, context.canvas.width, 110);
   context.fillStyle='#fff'; context.font='bold 60px Arial'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 40);
 }
 
@@ -311,24 +321,23 @@ function drawVariantClassic(context, match, logos){
 function drawVariantStripeTop(context, match, logos){
   clearAndBackground(context);
   const {centerX, centerY} = {centerX: context.canvas.width/2, centerY: context.canvas.height/2};
-  // Top stripe
-  context.fillStyle='rgba(231,76,60,0.95)'; context.fillRect(0,0,context.canvas.width,160);
+  // Top stripe color changed to black
+  context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0,0,context.canvas.width,160);
   context.fillStyle='#fff'; context.font='bold 54px Arial'; context.textAlign='center';
   context.fillText('SV DRC 2012', centerX, 105);
-  // Middle card transparent
   context.fillStyle='rgba(255,255,255,0.92)'; context.roundRect(centerX-420, centerY-230, 840, 460, 38); context.fill();
   context.fillStyle='#2c3e50'; context.font='bold 40px Arial';
   wrapCentered(context, match.date.toUpperCase(), centerX, centerY-150, 720, 44);
   const logosMeta = commonLogos(match, context, logos);
   context.fillStyle='#2c3e50'; context.font='bold 72px Arial'; context.fillText('VS', centerX, logosMeta.centerY + 10);
-  context.fillStyle='#e74c3c'; context.font='bold 62px Arial'; context.fillText(match.time, centerX, logosMeta.centerY + 120);
+  // Time color changed to black
+  context.fillStyle='#000000'; context.font='bold 62px Arial'; context.fillText(match.time, centerX, logosMeta.centerY + 120);
   context.fillStyle='#fff'; context.fillRect(centerX-200, logosMeta.centerY + 150, 400, 58);
-  context.fillStyle='#e74c3c'; context.font='bold 30px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, logosMeta.centerY + 192);
+  context.fillStyle='#000000'; context.font='bold 30px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, logosMeta.centerY + 192);
 }
 
 function drawVariantDiagonal(context, match, logos){
   clearAndBackground(context);
-  // White diagonal panel instead of purple gradient
   context.save();
   context.beginPath();
   context.moveTo(0,0);
@@ -340,23 +349,24 @@ function drawVariantDiagonal(context, match, logos){
   context.fill();
   context.restore();
   const centerX = context.canvas.width/2; const centerY = context.canvas.height/2 - 40;
-  // Date (dark)
   context.fillStyle='#2c3e50'; context.font='bold 44px Arial'; context.textAlign='center';
   wrapCentered(context, match.date.toUpperCase(), centerX, centerY-190, 760, 46);
-  // Circular soft white backplates for logos
   const homeLogo = logos?.home?.img || null; const awayLogo = logos?.away?.img || null;
   const radius = 130; const homeCx = centerX - 260; const awayCx = centerX + 260; const cy = centerY - 20;
   [ [homeCx, homeLogo, 'HOME'], [awayCx, awayLogo, 'AWAY'] ].forEach(([cx,img,label])=>{
     context.beginPath(); context.arc(cx, cy, radius, 0, Math.PI*2); context.fillStyle='rgba(255,255,255,0.55)'; context.fill();
     if (img) context.drawImage(img, cx-110, cy-110, 220, 220); else placeholderBadge(context, cx, cy, label);
   });
-  // VS & time styling
-  context.fillStyle='#e74c3c'; context.font='bold 100px Arial'; context.fillText('VS', centerX, centerY + 35);
+  context.fillStyle='#000000'; context.font='bold 100px Arial'; context.fillText('VS', centerX, centerY + 35);
   context.fillStyle='#2c3e50'; context.font='bold 70px Arial'; context.fillText(match.time, centerX, centerY + 140);
-  // Bottom ribbon stays brand red
-  context.fillStyle='rgba(231,76,60,0.95)'; context.fillRect(0, context.canvas.height-140, context.canvas.width, 140);
-  context.fillStyle='#fff'; context.font='bold 42px Arial'; context.fillText(match.isHome ? 'THUIS' : 'UIT', centerX, context.canvas.height - 90);
-  context.font='bold 64px Arial'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 40);
+  context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0, context.canvas.height-140, context.canvas.width, 140);
+  // Place THUIS/UIT back onto black bar (lowered from h-120 to h-95) and add subtle shadow
+  context.save();
+  context.fillStyle='#fff'; context.font='bold 42px Arial';
+  context.shadowColor='rgba(0,0,0,0.5)'; context.shadowBlur=8; context.shadowOffsetY=2;
+  context.fillText(match.isHome ? 'THUIS' : 'UIT', centerX, context.canvas.height - 95);
+  context.restore();
+  context.font='bold 64px Arial'; context.fillStyle='#fff'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 40);
 }
 
 function drawVariantMinimal(context, match, logos){
@@ -368,33 +378,41 @@ function drawVariantMinimal(context, match, logos){
   const homeLogo = logos?.home?.img || null; const awayLogo = logos?.away?.img || null; const size=180; const logoY = centerY - size/2 - 40;
   if (homeLogo) context.drawImage(homeLogo, centerX - size - 40, logoY, size, size); else placeholderBadge(context, centerX - size/2 - 40, logoY + size/2, 'HOME');
   if (awayLogo) context.drawImage(awayLogo, centerX + 40, logoY, size, size); else placeholderBadge(context, centerX + 40 + size/2, logoY + size/2, 'AWAY');
-  context.fillStyle='#e74c3c'; context.font='bold 82px Arial'; context.fillText('VS', centerX, centerY + 60);
+  // VS highlight color changed to black
+  context.fillStyle='#000000'; context.font='bold 82px Arial'; context.fillText('VS', centerX, centerY + 60);
   context.fillStyle='#2c3e50'; context.font='bold 60px Arial'; context.fillText(match.time, centerX, centerY + 150);
-  context.fillStyle='#e74c3c'; context.font='bold 34px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY + 210);
-  context.fillStyle='rgba(231,76,60,0.95)'; context.fillRect(0, context.canvas.height - 90, context.canvas.width, 90);
+  // THUIS/UIT text color changed to black
+  context.fillStyle='#000000'; context.font='bold 34px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', centerX, centerY + 210);
+  // Bottom bar changed to black
+  context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0, context.canvas.height - 90, context.canvas.width, 90);
   context.fillStyle='#fff'; context.font='bold 58px Arial'; context.fillText('SV DRC 2012', centerX, context.canvas.height - 30);
 }
 // New Variant 5: Split Vertical panel
 function drawVariantSplitVertical(context, match, logos){
   clearAndBackground(context);
   const w = context.canvas.width; const h = context.canvas.height; const centerX = w/2;
-  // Left panel
+  // Gradient changed from red tones to black transparency
   const grad = context.createLinearGradient(0,0, w*0.55,0);
-  grad.addColorStop(0,'rgba(231,76,60,0.95)');
-  grad.addColorStop(1,'rgba(231,76,60,0.55)');
+  grad.addColorStop(0,'rgba(0,0,0,0.95)');
+  grad.addColorStop(1,'rgba(0,0,0,0.55)');
   context.fillStyle=grad; context.fillRect(0,0,w*0.55,h);
-  // Date & time
   context.fillStyle='#fff'; context.font='bold 48px Arial'; context.textAlign='left';
-  wrapCentered(context, match.date.toUpperCase(), w*0.27, h*0.18, w*0.45, 50);
+  // Date lifted slightly (center y from h*0.18 to h*0.16) to clear space for logos
+  wrapCentered(context, match.date.toUpperCase(), w*0.27, h*0.16, w*0.45, 50);
   context.font='bold 90px Arial'; context.fillStyle='#fff'; context.fillText(match.time, w*0.10 + (w*0.45)/2, h*0.55);
-  context.font='bold 38px Arial'; context.fillStyle='#2c3e50'; context.textAlign='center';
-  context.fillText(match.isHome ? 'THUIS' : 'UIT', w*0.275, h*0.66);
-  // Logos & VS on right side
-  const home = logos?.home?.img; const away = logos?.away?.img; const size=230; const logoY = h*0.18;
+  context.save();
+  context.font='bold 44px Arial'; context.textAlign='center';
+  context.fillStyle='#ffffff';
+  context.shadowColor='rgba(0,0,0,0.65)'; context.shadowBlur=10; context.shadowOffsetY=3;
+  // Extra ruimte onder tijd: van h*0.59 naar h*0.605
+  context.fillText(match.isHome ? 'THUIS' : 'UIT', w*0.275, h*0.605);
+  context.restore();
+  const home = logos?.home?.img; const away = logos?.away?.img; const size=230;
+  // Logos moved down (logoY from h*0.18 to h*0.26) so they no longer overlap the date
+  const logoY = h*0.26;
   if (home) context.drawImage(home, centerX + 40 - size/2, logoY, size, size); else placeholderBadge(context, centerX + 40, logoY + size/2, 'HOME');
   if (away) context.drawImage(away, centerX + 300 - size/2, logoY, size, size); else placeholderBadge(context, centerX + 300, logoY + size/2, 'AWAY');
-  context.fillStyle='#e74c3c'; context.font='bold 110px Arial'; context.fillText('VS', centerX + 170, logoY + size/2 + 35);
-  // Bottom bar
+  context.fillStyle='#000000'; context.font='bold 110px Arial'; context.fillText('VS', centerX + 170, logoY + size/2 + 35);
   context.fillStyle='rgba(0,0,0,0.6)'; context.fillRect(0,h-120,w,120);
   context.fillStyle='#fff'; context.font='bold 70px Arial'; context.textAlign='center'; context.fillText('SV DRC 2012', w/2, h-40);
 }
@@ -402,29 +420,30 @@ function drawVariantSplitVertical(context, match, logos){
 function drawVariantBadgeCenter(context, match, logos){
   clearAndBackground(context);
   const w = context.canvas.width; const h = context.canvas.height; const cx = w/2; const cy = h/2;
-  // Dark radial vignette
   const rad = context.createRadialGradient(cx,cy,50,cx,cy,Math.max(w,h)/1.2);
   rad.addColorStop(0,'rgba(0,0,0,0.2)'); rad.addColorStop(1,'rgba(0,0,0,0.75)');
   context.fillStyle=rad; context.fillRect(0,0,w,h);
-  // Concentric rings
   context.strokeStyle='rgba(255,255,255,0.25)';
   for (let r=420;r<=520;r+=50){ context.beginPath(); context.lineWidth=4; context.arc(cx,cy,r,0,Math.PI*2); context.stroke(); }
-  // Central badge
   context.beginPath(); context.arc(cx,cy,360,0,Math.PI*2); context.fillStyle='rgba(255,255,255,0.10)'; context.fill();
-  context.beginPath(); context.arc(cx,cy,300,0,Math.PI*2); context.fillStyle='rgba(231,76,60,0.92)'; context.fill();
-  // Date on top arc
+  context.beginPath(); context.arc(cx,cy,300,0,Math.PI*2); context.fillStyle='rgba(0,0,0,0.92)'; context.fill();
   context.fillStyle='#fff'; context.font='bold 44px Arial'; context.textAlign='center';
   wrapCentered(context, match.date.toUpperCase(), cx, cy - 180, 520, 48);
-  // Logos left/right inside badge
   const home = logos?.home?.img; const away = logos?.away?.img; const size=170;
   if (home) context.drawImage(home, cx - 240 - size/2, cy - size/2, size, size); else placeholderBadge(context, cx - 240, cy, 'HOME');
   if (away) context.drawImage(away, cx + 240 - size/2, cy - size/2, size, size); else placeholderBadge(context, cx + 240, cy, 'AWAY');
-  context.fillStyle='#fff'; context.font='bold 140px Arial'; context.fillText('VS', cx, cy + 40);
-  context.fillStyle='#2c3e50'; context.font='bold 80px Arial'; context.fillText(match.time, cx, cy + 170);
+  context.fillStyle='#000000'; context.font='bold 140px Arial'; context.fillText('VS', cx, cy + 40);
+  // Move time drawing later (was here) so it layers above everything and stands out
   context.fillStyle='#fff'; context.font='bold 46px Arial'; context.fillText(match.isHome ? 'THUISWEDSTRIJD' : 'UITWEDSTRIJD', cx, cy + 240);
-  // Bottom label
-  context.fillStyle='rgba(231,76,60,0.95)'; context.fillRect(0,h-110,w,110);
+  context.fillStyle='rgba(0,0,0,0.95)'; context.fillRect(0,h-110,w,110);
   context.fillStyle='#fff'; context.font='bold 68px Arial'; context.fillText('SV DRC 2012', cx, h-38);
+  // Draw time last for top layering; use white + subtle shadow for contrast on black circle
+  context.save();
+  context.font='bold 80px Arial';
+  context.fillStyle='#ffffff';
+  context.shadowColor='rgba(0,0,0,0.6)'; context.shadowBlur=18; context.shadowOffsetX=0; context.shadowOffsetY=4;
+  context.fillText(match.time, cx, cy + 170);
+  context.restore();
 }
 
 // Updated generate to produce all variants
